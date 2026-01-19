@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_input.dart';
-import '../home/home_screen.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/user_provider.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -49,16 +50,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+      final authProvider = context.read<AuthProvider>();
+      final userProvider = context.read<UserProvider>();
       
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      final success = await authProvider.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
       
-      if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+      if (success && mounted) {
+        // Initialize user provider with logged in user
+        if (authProvider.currentUser != null) {
+          userProvider.initializeUser(authProvider.currentUser!);
+        }
+        // Navigation handled by Consumer in main.dart
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Login failed'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -121,13 +132,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: AppConstants.paddingLarge),
                     
                     // Login Button
-                    CustomButton(
-                      text: 'Login',
-                      onPressed: _isLoading ? null : _handleLogin,
-                      variant: ButtonVariant.gradient,
-                      size: ButtonSize.large,
-                      isLoading: _isLoading,
-                      fullWidth: true,
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, _) {
+                        return CustomButton(
+                          text: 'Login',
+                          onPressed: authProvider.isLoading ? null : _handleLogin,
+                          variant: ButtonVariant.gradient,
+                          size: ButtonSize.large,
+                          isLoading: authProvider.isLoading,
+                          fullWidth: true,
+                        );
+                      },
                     ),
                     const SizedBox(height: AppConstants.paddingLarge),
                     
