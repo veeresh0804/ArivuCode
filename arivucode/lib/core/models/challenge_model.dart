@@ -39,7 +39,11 @@ class Challenge {
   final List<TestCase> testCases;
   final Map<String, String> starterCode; // language -> code
   final List<String> tags;
+  final String category; // Arrays, Strings, DP, etc.
   final String? hints;
+  final int hintPenalty;
+  final String? editorial;
+  final List<String> similarChallenges;
   final int solvedCount;
   final double successRate;
   final DateTime createdAt;
@@ -55,7 +59,11 @@ class Challenge {
     required this.testCases,
     required this.starterCode,
     this.tags = const [],
+    this.category = 'General',
     this.hints,
+    this.hintPenalty = 0,
+    this.editorial,
+    this.similarChallenges = const [],
     this.solvedCount = 0,
     this.successRate = 0.0,
     required this.createdAt,
@@ -73,7 +81,11 @@ class Challenge {
       'testCases': testCases.map((tc) => tc.toJson()).toList(),
       'starterCode': starterCode,
       'tags': tags,
+      'category': category,
       'hints': hints,
+      'hintPenalty': hintPenalty,
+      'editorial': editorial,
+      'similarChallenges': similarChallenges,
       'solvedCount': solvedCount,
       'successRate': successRate,
       'createdAt': createdAt.toIso8601String(),
@@ -94,7 +106,11 @@ class Challenge {
           .toList(),
       starterCode: Map<String, String>.from(json['starterCode'] as Map),
       tags: List<String>.from(json['tags'] as List? ?? []),
+      category: json['category'] as String? ?? 'General',
       hints: json['hints'] as String?,
+      hintPenalty: json['hintPenalty'] as int? ?? 0,
+      editorial: json['editorial'] as String?,
+      similarChallenges: List<String>.from(json['similarChallenges'] as List? ?? []),
       solvedCount: json['solvedCount'] as int? ?? 0,
       successRate: (json['successRate'] as num?)?.toDouble() ?? 0.0,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -112,7 +128,11 @@ class Challenge {
     List<TestCase>? testCases,
     Map<String, String>? starterCode,
     List<String>? tags,
+    String? category,
     String? hints,
+    int? hintPenalty,
+    String? editorial,
+    List<String>? similarChallenges,
     int? solvedCount,
     double? successRate,
     DateTime? createdAt,
@@ -128,7 +148,11 @@ class Challenge {
       testCases: testCases ?? this.testCases,
       starterCode: starterCode ?? this.starterCode,
       tags: tags ?? this.tags,
+      category: category ?? this.category,
       hints: hints ?? this.hints,
+      hintPenalty: hintPenalty ?? this.hintPenalty,
+      editorial: editorial ?? this.editorial,
+      similarChallenges: similarChallenges ?? this.similarChallenges,
       solvedCount: solvedCount ?? this.solvedCount,
       successRate: successRate ?? this.successRate,
       createdAt: createdAt ?? this.createdAt,

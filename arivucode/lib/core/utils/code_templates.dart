@@ -44,6 +44,31 @@ function main() {
 
 main();
 ''',
+    'Rust': '''// Rust Code
+fn main() {
+    println!("Hello, ArivuCode!");
+}
+''',
+    'Go': '''// Go Code
+package main
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, ArivuCode!")
+}
+''',
+    'TypeScript': '''// TypeScript Code
+function main(): void {
+    console.log("Hello, ArivuCode!");
+}
+
+main();
+''',
+    'Kotlin': '''// Kotlin Code
+fun main() {
+    println("Hello, ArivuCode!")
+}
+''',
   };
 
   /// Get template for a specific language
@@ -55,10 +80,7 @@ main();
   static String getEmptyTemplate(String language) {
     return switch (language) {
       'Python' => '# Write your Python code here\n',
-      'C' => '// Write your C code here\n',
-      'C++' => '// Write your C++ code here\n',
-      'Java' => '// Write your Java code here\n',
-      'JavaScript' => '// Write your JavaScript code here\n',
+      'C' || 'C++' || 'Java' || 'JavaScript' || 'TypeScript' || 'Rust' || 'Go' || 'Kotlin' => '// Write your $language code here\n',
       _ => '// Write your code here\n',
     };
   }

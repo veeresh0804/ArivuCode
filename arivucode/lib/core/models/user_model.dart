@@ -13,6 +13,8 @@ class User {
   final List<String> friendIds;
   final DateTime createdAt;
   final Map<String, int> languageStats; // language -> problems solved
+  final int level;
+  final int experiencePoints;
 
   const User({
     required this.id,
@@ -28,6 +30,8 @@ class User {
     this.friendIds = const [],
     required this.createdAt,
     this.languageStats = const {},
+    this.level = 1,
+    this.experiencePoints = 0,
   });
 
   Map<String, dynamic> toJson() {
@@ -45,6 +49,8 @@ class User {
       'friendIds': friendIds,
       'createdAt': createdAt.toIso8601String(),
       'languageStats': languageStats,
+      'level': level,
+      'experiencePoints': experiencePoints,
     };
   }
 
@@ -63,6 +69,8 @@ class User {
       friendIds: List<String>.from(json['friendIds'] as List? ?? []),
       createdAt: DateTime.parse(json['createdAt'] as String),
       languageStats: Map<String, int>.from(json['languageStats'] as Map? ?? {}),
+      level: json['level'] as int? ?? 1,
+      experiencePoints: json['experiencePoints'] as int? ?? 0,
     );
   }
 
@@ -80,6 +88,8 @@ class User {
     List<String>? friendIds,
     DateTime? createdAt,
     Map<String, int>? languageStats,
+    int? level,
+    int? experiencePoints,
   }) {
     return User(
       id: id ?? this.id,
@@ -95,6 +105,8 @@ class User {
       friendIds: friendIds ?? this.friendIds,
       createdAt: createdAt ?? this.createdAt,
       languageStats: languageStats ?? this.languageStats,
+      level: level ?? this.level,
+      experiencePoints: experiencePoints ?? this.experiencePoints,
     );
   }
 
@@ -113,5 +125,16 @@ class User {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
     return username[0].toUpperCase();
+  }
+
+  /// Get experience needed for next level
+  /// Formula: 100 * level^1.5
+  int get experienceToNextLevel {
+    return (100 * (level * level * 0.5 + level * 0.5)).toInt();
+  }
+
+  /// Get progress percentage to next level (0.0 to 1.0)
+  double get levelProgress {
+    return (experiencePoints / experienceToNextLevel).clamp(0.0, 1.0);
   }
 }

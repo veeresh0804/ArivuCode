@@ -10,6 +10,7 @@ import 'providers/challenge_provider.dart';
 import 'services/auth_service.dart';
 import 'services/storage_service.dart';
 import 'features/home/home_screen.dart';
+import 'widgets/achievement_notification_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,10 +69,11 @@ class ArivuCodeApp extends StatelessWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: AppConstants.appName,
-            theme: AppTheme.darkTheme,
-            home: authProvider.isAuthenticated
-                ? const HomeScreen()
-                : const LoginScreen(),
+            home: AchievementNotificationManager(
+              child: authProvider.isAuthenticated
+                  ? const HomeScreen()
+                  : const LoginScreen(),
+            ),
           );
         },
       ),

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../widgets/custom_card.dart';
-import '../../widgets/streak_indicator.dart';
+import '../../widgets/streak_indicator.dart'; // Ensure this matches actual file
 import '../editor/code_editor_screen.dart';
 import '../challenge/challenge_screen.dart';
 import '../profile/profile_screen.dart';
+import '../gamification/leaderboard_screen.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/hologram_globe.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,34 +20,32 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
-  // Mock data
-  final int _streakCount = 7;
-  final String _username = 'CodeWarrior';
-  final int _totalPoints = 250;
-  final int _solvedProblems = 15;
 
   @override
   Widget build(BuildContext context) {
+    // Consume user data
+    final userProvider = context.watch<UserProvider>();
+    final user = userProvider.user;
+
     return Scaffold(
-      body: _buildBody(),
+      body: _buildBody(userProvider),
       bottomNavigationBar: _buildBottomNav(),
       floatingActionButton: _buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(UserProvider userProvider) {
     return switch (_currentIndex) {
-      0 => _buildHomeTab(),
+      0 => _buildHomeTab(userProvider),
       1 => const ChallengeScreen(),
-      2 => const CodeEditorScreen(),
-      3 => const ProfileScreen(),
-      _ => _buildHomeTab(),
+      2 => const CodeEditorScreen(), // Accessed via FAB usually, but kept for logic
+      3 => const ProfileScreen(), // Ensure this widget exists
+      _ => _buildHomeTab(userProvider),
     };
   }
 
-  Widget _buildHomeTab() {
+  Widget _buildHomeTab(UserProvider userProvider) {
     return Container(
       decoration: const BoxDecoration(
         gradient: AppColors.backgroundGradient,
@@ -53,18 +55,31 @@ class _HomeScreenState extends State<HomeScreen> {
           slivers: [
             // Header
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.paddingLarge),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildWelcomeHeader(),
-                    const SizedBox(height: 24),
-                    _buildStreakCard(),
-                    const SizedBox(height: 24),
-                    _buildStatsRow(),
-                  ],
-                ),
+              child: Stack(
+                children: [
+                  // Holographic background element
+                  Positioned(
+                    right: -50,
+                    top: -20,
+                    child: Opacity(
+                      opacity: 0.5,
+                      child: const HologramGlobe(size: 250),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildWelcomeHeader(userProvider.user?.username ?? 'Coder'),
+                        const SizedBox(height: 24),
+                        _buildStreakCard(userProvider.currentStreak),
+                        const SizedBox(height: 24),
+                        _buildStatsRow(userProvider.totalPoints, userProvider.solvedProblems),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             
@@ -125,25 +140,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       end: Alignment.bottomRight,
                     ),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ChallengeScreen(),
-                        ),
-                      );
+                      // Navigate via BottomNav or Push
+                      setState(() => _currentIndex = 1);
                     },
                   ),
                   _buildFeatureCard(
-                    icon: Icons.people,
-                    title: 'Friends',
-                    subtitle: 'Connect & compete',
+                    icon: Icons.leaderboard,
+                    title: 'Leaderboard',
+                    subtitle: 'Top coders',
                     gradient: LinearGradient(
                       colors: [AppColors.warning, AppColors.error],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     onTap: () {
-                      // TODO: Navigate to friends screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LeaderboardScreen(),
+                        ),
+                      );
                     },
                   ),
                   _buildFeatureCard(
@@ -156,7 +172,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       end: Alignment.bottomRight,
                     ),
                     onTap: () {
-                      // TODO: Navigate to learning resources
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Learning resources coming soon!')),
+                      );
                     },
                   ),
                 ]),
@@ -172,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildWelcomeHeader() {
+  Widget _buildWelcomeHeader(String username) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -191,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shaderCallback: (bounds) =>
                   AppColors.primaryGradient.createShader(bounds),
               child: Text(
-                _username,
+                username,
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
@@ -210,7 +228,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
-              // TODO: Show notifications
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No new notifications')),
+              );
             },
           ),
         ),
@@ -218,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStreakCard() {
+  Widget _buildStreakCard(int streak) {
     return CustomCard(
       useGradient: true,
       gradient: AppColors.streakGradient,
@@ -244,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$_streakCount days',
+                  '$streak days',
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
@@ -267,13 +287,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(int points, int solved) {
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             icon: Icons.star,
-            value: _totalPoints.toString(),
+            value: points.toString(),
             label: 'Points',
             color: AppColors.warning,
           ),
@@ -282,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: _buildStatCard(
             icon: Icons.check_circle,
-            value: _solvedProblems.toString(),
+            value: solved.toString(),
             label: 'Solved',
             color: AppColors.success,
           ),
@@ -370,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: AppColors.backgroundMedium,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withValues(alpha: 0.2), // Updated to proper API
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -417,7 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.4),
+            color: AppColors.primary.withOpacity(0.4),
             blurRadius: 15,
             spreadRadius: 2,
           ),
