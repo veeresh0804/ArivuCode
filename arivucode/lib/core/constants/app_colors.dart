@@ -6,9 +6,9 @@ class AppColors {
   AppColors._();
 
   // ============ Primary Colors ============
-  static const Color primary = Color(0xFF6C63FF); // Vibrant purple
-  static const Color primaryLight = Color(0xFF8B85FF);
-  static const Color primaryDark = Color(0xFF5449E0);
+  static const Color primary = Color(0xFF7B61FF); // Slightly more vibrant purple
+  static const Color primaryLight = Color(0xFF9E8AFF);
+  static const Color primaryDark = Color(0xFF5E45E0);
   
   static const Color secondary = Color(0xFF00D9FF); // Cyan accent
   static const Color secondaryLight = Color(0xFF4DE4FF);
@@ -22,6 +22,10 @@ class AppColors {
   // ============ Surface Colors ============
   static const Color surface = Color(0xFF1E1E3F);
   static const Color surfaceVariant = Color(0xFF2A2A4A);
+  
+  // ============ Glassmorphism Colors ============
+  static const Color glassSurface = Color(0x1A6C63FF); // 10% primary
+  static const Color glassBorder = Color(0x33FFFFFF); // 20% white
   
   // ============ Text Colors ============
   static const Color textPrimary = Color(0xFFFFFFFF);
@@ -104,4 +108,23 @@ class AppColors {
   static const Color overlay = Color(0x80000000); // 50% black
   static const Color overlayLight = Color(0x40000000); // 25% black
   static const Color overlayDark = Color(0xB3000000); // 70% black
+
+  // ============ Glassmorphism Helper ============
+  static BoxDecoration glassDecoration({
+    double borderRadius = 16.0,
+    Color? color,
+  }) {
+    return BoxDecoration(
+      color: color ?? glassSurface,
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: glassBorder),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 10,
+          spreadRadius: 2,
+        ),
+      ],
+    );
+  }
 }

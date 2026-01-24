@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_constants.dart';
@@ -70,12 +71,14 @@ class CustomCard extends StatelessWidget {
   }
 }
 
-/// Glass morphism card with blur effect
+/// Glass morphism card with premium blur effect
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
   final BorderRadius? borderRadius;
+  final double blur;
+  final double opacity;
 
   const GlassCard({
     super.key,
@@ -83,6 +86,8 @@ class GlassCard extends StatelessWidget {
     this.padding,
     this.onTap,
     this.borderRadius,
+    this.blur = 10.0,
+    this.opacity = 0.1,
   });
 
   @override
@@ -90,17 +95,23 @@ class GlassCard extends StatelessWidget {
     final effectiveBorderRadius =
         borderRadius ?? BorderRadius.circular(AppConstants.borderRadiusMedium);
 
-    Widget content = Container(
-      padding: padding ?? const EdgeInsets.all(AppConstants.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.3),
-        borderRadius: effectiveBorderRadius,
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
+    Widget content = ClipRRect(
+      borderRadius: effectiveBorderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: Container(
+          padding: padding ?? const EdgeInsets.all(AppConstants.paddingMedium),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(opacity),
+            borderRadius: effectiveBorderRadius,
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.5,
+            ),
+          ),
+          child: child,
         ),
       ),
-      child: child,
     );
 
     if (onTap != null) {
@@ -114,8 +125,17 @@ class GlassCard extends StatelessWidget {
       );
     }
 
-    return ClipRRect(
-      borderRadius: effectiveBorderRadius,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: effectiveBorderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            spreadRadius: -5,
+          ),
+        ],
+      ),
       child: content,
     );
   }
